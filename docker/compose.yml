@@ -1,0 +1,37 @@
+services:
+  from_others:
+    build: .
+    tty: true
+    stdin_open: true
+    command: /bin/bash
+    volumes:
+      - /data2/openreal2sim/divleen:/data2/openreal2sim/divleen
+      - /data2/openreal2sim/esteban:/data2/openreal2sim/esteban
+      - /data2/openreal2sim/junsoo:/data2/openreal2sim/junsoo
+      - /data2/openreal2sim/peiqi:/data2/openreal2sim/peiqi
+      - /data2/openreal2sim/scene_00020:/data2/openreal2sim/scene_00020
+      - /data2/openreal2sim/peiqi_scene:/data2/openreal2sim/peiqi_scene
+      - /data2/openreal2sim/scripts:/data2/openreal2sim/scripts
+      - /data2/openreal2sim/reconstructions:/data2/openreal2sim/reconstructions
+    working_dir: /data2/openreal2sim
+    environment:
+      - PYTHONPATH=/data2/openreal2sim
+  from_me:
+    build:
+      context: .
+      dockerfile: dockerfile
+    tty: true
+    stdin_open: true
+    command: /bin/bash
+    user: "${HOST_UID}:${HOST_GID}"
+    volumes:
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
+      - /data2/openreal2sim/divleen:/data2/openreal2sim/divleen
+      - /data2/openreal2sim/esteban:/data2/openreal2sim/esteban
+      - /data2/openreal2sim/junsoo:/data2/openreal2sim/junsoo
+      - /data2/openreal2sim/scripts:/data2/openreal2sim/scripts
+      - /data2/openreal2sim/reconstructions:/data2/openreal2sim/reconstructions
+    working_dir: /data2/openreal2sim
+    environment:
+      - PYTHONPATH=/data2/openreal2sim

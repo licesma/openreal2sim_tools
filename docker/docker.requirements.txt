@@ -1,0 +1,4 @@
+PyYAML
+numpy
+google-cloud-firestore
+firebase-admin

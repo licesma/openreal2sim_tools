@@ -1,0 +1,10 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+COPY docker.requirements.txt .
+RUN python -m pip install --no-cache-dir -r docker.requirements.txt
+
+COPY . .
+
+SHELL ["/bin/bash", "-lc"]
