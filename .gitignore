@@ -1,2 +1,4 @@
 config/firebase.json
 logs/
+__pycache__/
+pipeline_integration/__pycache__/

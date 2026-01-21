@@ -16,11 +16,12 @@ from pipeline_integration.p2_fill_metadata import fill_metadata
 from pipeline_integration.p3_prepare_for_storage import prepare_for_storage
 from pipeline_integration.p4_push_metadatas import push_metadatas
 from pipeline_integration.p5_move_to_reconstructions import move_to_reconstructions
+from paths import TOOLS_PATH
 
 
-DOCKER_COMPOSE_DIR = Path("/data2/openreal2sim/scripts/docker")
-PIPELINE_SCRIPTS_DIR = Path("/data2/openreal2sim/scripts/pipeline_integration")
-LOGS_DIR = Path("/data2/openreal2sim/scripts/logs")
+DOCKER_COMPOSE_DIR = TOOLS_PATH / "docker" 
+PIPELINE_SCRIPTS_DIR = TOOLS_PATH / "pipeline_integration"
+LOGS_DIR = TOOLS_PATH / "logs"
 
 STEPS = ["1_move", "2_metadata", "3_storage", "4_firestore", "5_recon"]
 

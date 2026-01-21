@@ -9,10 +9,9 @@ import yaml
 from firebase_admin import credentials, firestore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from paths import ESTEBAN_OUTPUTS
+from paths import ESTEBAN_OUTPUTS, FIREBASE_PATH
 
 OUTPUTS_BASE = ESTEBAN_OUTPUTS
-FIREBASE_PATH = Path("/data2/openreal2sim/scripts/config/firebase.json")
 
 
 def load_config(config_path: str) -> dict:
