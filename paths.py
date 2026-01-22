@@ -10,8 +10,9 @@ ROOT = Path("/data/openreal2sim")
 
 # Base path for reconstruction outputs organized by week/author
 # Structure: RECONSTRUCTIONS/<week>/<author>/<key>/
-RECONSTRUCTIONS = ROOT / "reconstructions" / "data"
-
+RECONSTRUCTIONS = ROOT / "reconstructions"
+HUNYUAN = RECONSTRUCTIONS / "hunyuan"
+SAM = RECONSTRUCTIONS / "sam"
 # Base path for intermediate outputs before moving to reconstructions
 # Structure: ESTEBAN_OUTPUTS/<key>/
 ESTEBAN_OUTPUTS = ROOT / "esteban" / "outputs"

@@ -2,7 +2,7 @@
 import shutil
 from pathlib import Path
 
-from paths import RECONSTRUCTIONS
+from paths import HUNYUAN, SAM
 
 
 def delete_geometry_on_recon(base_dir: Path, week: str | None = None, author: str | None = None) -> None:
@@ -93,10 +93,17 @@ if __name__ == "__main__":
         required=False,
         help="Optional author to filter on (e.g., 'esteban'). Defaults to all authors.",
     )
+    parser.add_argument(
+        "--use-sam",
+        action="store_true",
+        default=False,
+        help="Use SAM path instead of HUNYUAN",
+    )
 
     args = parser.parse_args()
+    base_dir = SAM if args.use_sam else HUNYUAN
     delete_geometry_on_recon(
-        base_dir=RECONSTRUCTIONS,
+        base_dir=base_dir,
         week=args.week,
         author=args.author,
     )

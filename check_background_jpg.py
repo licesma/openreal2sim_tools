@@ -3,7 +3,7 @@ import yaml
 from pathlib import Path
 from typing import List
 
-from paths import RECONSTRUCTIONS
+from paths import HUNYUAN, SAM
 
 
 def load_config(config_path: str) -> dict:
@@ -44,11 +44,15 @@ def find_key_paths_in_reconstructions(recon_base: Path, key: str) -> List[Path]:
     return matches
 
 
-def check_background_jpg(config_path: str) -> None:
+def check_background_jpg(config_path: str, use_sam: bool = False) -> None:
     """
     Check if background.jpg exists for all keys in reconstructions.
 
     Checks: RECONSTRUCTIONS/<week>/<author>/<key>/simulation/background.jpg
+
+    Args:
+        config_path: Path to the YAML config file containing 'keys'
+        use_sam: If True, use SAM path instead of HUNYUAN
     """
     try:
         # Load configuration
@@ -60,7 +64,7 @@ def check_background_jpg(config_path: str) -> None:
             return
 
         # Set up paths
-        recon_outputs = RECONSTRUCTIONS
+        recon_outputs = SAM if use_sam else HUNYUAN
 
         # Validate source base directory exists
         if not recon_outputs.exists():
@@ -147,6 +151,12 @@ if __name__ == "__main__":
         required=True,
         help="Path to the YAML config file containing 'keys'"
     )
+    parser.add_argument(
+        "--use-sam",
+        action="store_true",
+        default=False,
+        help="Use SAM path instead of HUNYUAN"
+    )
 
     args = parser.parse_args()
-    check_background_jpg(args.config)
+    check_background_jpg(args.config, use_sam=args.use_sam)

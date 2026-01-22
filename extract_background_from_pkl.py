@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import List
 from PIL import Image
 
-from paths import RECONSTRUCTIONS
+from paths import HUNYUAN, SAM
 
 
 def load_config(config_path: str) -> dict:
@@ -53,12 +53,17 @@ def find_key_paths_in_reconstructions(recon_base: Path, key: str) -> List[Path]:
     return matches
 
 
-def extract_background_from_pkl(config_path: str, dry_run: bool = False) -> None:
+def extract_background_from_pkl(config_path: str, dry_run: bool = False, use_sam: bool = False) -> None:
     """
     Extract background.jpg from scene.pkl for all keys in config.
 
     Reads: RECONSTRUCTIONS/<week>/<author>/<key>/scene/scene.pkl
     Writes: RECONSTRUCTIONS/<week>/<author>/<key>/simulation/background.jpg
+
+    Args:
+        config_path: Path to the YAML config file containing 'keys'
+        dry_run: Show what would be done without actually extracting
+        use_sam: If True, use SAM path instead of HUNYUAN
     """
     try:
         # Load configuration
@@ -70,7 +75,7 @@ def extract_background_from_pkl(config_path: str, dry_run: bool = False) -> None
             return
 
         # Set up paths
-        recon_outputs = RECONSTRUCTIONS
+        recon_outputs = SAM if use_sam else HUNYUAN
 
         # Validate source base directory exists
         if not recon_outputs.exists():
@@ -219,6 +224,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Show what would be done without actually extracting"
     )
+    parser.add_argument(
+        "--use-sam",
+        action="store_true",
+        default=False,
+        help="Use SAM path instead of HUNYUAN"
+    )
 
     args = parser.parse_args()
-    extract_background_from_pkl(args.config, dry_run=args.dry_run)
+    extract_background_from_pkl(args.config, dry_run=args.dry_run, use_sam=args.use_sam)

@@ -8,9 +8,7 @@ from typing import List, Tuple
 import yaml
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from paths import ESTEBAN_OUTPUTS, RECONSTRUCTIONS
-
-RECON_OUTPUTS = RECONSTRUCTIONS
+from paths import ESTEBAN_OUTPUTS, HUNYUAN, SAM
 
 
 def load_config(config_path: str) -> dict:
@@ -71,7 +69,7 @@ def has_successful_reconstruction(source_dir: Path) -> bool:
     return False
 
 
-def move_to_reconstructions(config_path: str, log_file: str = None, require_success: bool = False) -> List[str]:
+def move_to_reconstructions(config_path: str, log_file: str = None, require_success: bool = False, use_sam: bool = False) -> List[str]:
     """
     Move folders for all keys from esteban outputs to reconstructions outputs,
     organized by week and author.
@@ -83,11 +81,13 @@ def move_to_reconstructions(config_path: str, log_file: str = None, require_succ
         config_path: Path to the YAML config file containing 'keys'
         log_file: If provided, write output to this file instead of stdout
         require_success: Only move keys whose metadata has reconstruction_status=success
+        use_sam: If True, use SAM path instead of HUNYUAN
 
     Returns:
         List of keys that were successfully moved
     """
     successful_keys: List[str] = []
+    recon_outputs = SAM if use_sam else HUNYUAN
 
     def log(msg: str) -> None:
         if log_file:
@@ -108,9 +108,9 @@ def move_to_reconstructions(config_path: str, log_file: str = None, require_succ
             log(f"Source base directory does not exist: {ESTEBAN_OUTPUTS}")
             return successful_keys
 
-        if not RECON_OUTPUTS.exists():
-            RECON_OUTPUTS.mkdir(parents=True, exist_ok=True)
-            log(f"Created directory: {RECON_OUTPUTS}")
+        if not recon_outputs.exists():
+            recon_outputs.mkdir(parents=True, exist_ok=True)
+            log(f"Created directory: {recon_outputs}")
 
         moved = 0
         skipped = 0
@@ -118,7 +118,7 @@ def move_to_reconstructions(config_path: str, log_file: str = None, require_succ
 
         log(f"\nMoving esteban outputs to reconstructions (by week/author):")
         log(f"Source: {ESTEBAN_OUTPUTS}")
-        log(f"Destination: {RECON_OUTPUTS}")
+        log(f"Destination: {recon_outputs}")
         log(f"Keys: {keys}")
         if require_success:
             log("Require success: True")
@@ -141,7 +141,7 @@ def move_to_reconstructions(config_path: str, log_file: str = None, require_succ
 
                 # Determine destination using metadata
                 week, author = load_metadata(source_dir)
-                dest_dir = RECON_OUTPUTS / week / author / key
+                dest_dir = recon_outputs / week / author / key
 
                 if dest_dir.exists():
                     log(f"⏭️  Already exists (skipping): {dest_dir}")
@@ -210,9 +210,15 @@ if __name__ == "__main__":
         default=False,
         help="Only move keys whose metadata has reconstruction_status=success",
     )
+    parser.add_argument(
+        "--use-sam",
+        action="store_true",
+        default=False,
+        help="Use SAM path instead of HUNYUAN",
+    )
 
     args = parser.parse_args()
-    successful = move_to_reconstructions(args.config, args.log_file, args.require_success)
+    successful = move_to_reconstructions(args.config, args.log_file, args.require_success, args.use_sam)
 
     if args.output_json:
         with open(args.output_json, "w") as f:

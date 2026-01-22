@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from paths import RECONSTRUCTIONS, ESTEBAN_OUTPUTS
+from paths import HUNYUAN, SAM, ESTEBAN_OUTPUTS
 
 
 def load_config(config_path: str) -> dict:
@@ -45,12 +45,17 @@ def find_key_paths_in_reconstructions(recon_base: Path, key: str) -> List[Path]:
     return matches
 
 
-def move_reconstructions_to_esteban_outputs(config_path: str, overwrite: bool = False) -> None:
+def move_reconstructions_to_esteban_outputs(config_path: str, overwrite: bool = False, use_sam: bool = False) -> None:
     """
     Move folders for all keys from reconstructions outputs back to esteban outputs.
 
     Source:      RECONSTRUCTIONS/<week>/<author>/<key>
     Destination: ESTEBAN_OUTPUTS/<key>
+
+    Args:
+        config_path: Path to the YAML config file containing 'keys'
+        overwrite: If set, overwrite existing destination folders in outputs
+        use_sam: If True, use SAM path instead of HUNYUAN
     """
     try:
         # Load configuration
@@ -62,7 +67,7 @@ def move_reconstructions_to_esteban_outputs(config_path: str, overwrite: bool = 
             return
 
         # Set up paths
-        recon_outputs = RECONSTRUCTIONS
+        recon_outputs = SAM if use_sam else HUNYUAN
         esteban_outputs = ESTEBAN_OUTPUTS
 
         # Validate source base directory exists
@@ -162,8 +167,14 @@ if __name__ == "__main__":
         default=False,
         help="If set, overwrite existing destination folders in outputs"
     )
+    parser.add_argument(
+        "--use-sam",
+        action="store_true",
+        default=False,
+        help="Use SAM path instead of HUNYUAN"
+    )
 
     args = parser.parse_args()
-    move_reconstructions_to_esteban_outputs(args.config, overwrite=args.overwrite)
+    move_reconstructions_to_esteban_outputs(args.config, overwrite=args.overwrite, use_sam=args.use_sam)
 
 

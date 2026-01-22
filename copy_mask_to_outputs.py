@@ -10,7 +10,7 @@ import yaml
 from pathlib import Path
 from typing import List
 
-from paths import RECONSTRUCTIONS, ESTEBAN_OUTPUTS
+from paths import HUNYUAN, SAM, ESTEBAN_OUTPUTS
 
 
 def load_config(config_path: str) -> dict:
@@ -51,12 +51,16 @@ def find_key_paths_in_reconstructions(recon_base: Path, key: str) -> List[Path]:
     return matches
 
 
-def copy_mask_to_outputs(config_path: str) -> None:
+def copy_mask_to_outputs(config_path: str, use_sam: bool = False) -> None:
     """
     Copy the 'mask' key from reconstructions scene.pkl to esteban outputs scene.pkl.
 
     Source:      RECONSTRUCTIONS/<week>/<author>/<key>/scene/scene.pkl
     Destination: ESTEBAN_OUTPUTS/<key>/scene/scene.pkl
+
+    Args:
+        config_path: Path to the YAML config file containing 'keys'
+        use_sam: If True, use SAM path instead of HUNYUAN
     """
     try:
         # Load configuration
@@ -68,7 +72,7 @@ def copy_mask_to_outputs(config_path: str) -> None:
             return
 
         # Set up paths
-        recon_outputs = RECONSTRUCTIONS
+        recon_outputs = SAM if use_sam else HUNYUAN
         esteban_outputs = ESTEBAN_OUTPUTS
 
         # Validate source base directory exists
@@ -182,5 +186,11 @@ if __name__ == "__main__":
         required=True,
         help="Path to the YAML config file containing 'keys'"
     )
+    parser.add_argument(
+        "--use-sam",
+        action="store_true",
+        default=False,
+        help="Use SAM path instead of HUNYUAN"
+    )
     args = parser.parse_args()
-    copy_mask_to_outputs(args.config)
+    copy_mask_to_outputs(args.config, use_sam=args.use_sam)
