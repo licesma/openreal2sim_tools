@@ -2,3 +2,5 @@ config/
 logs/
 __pycache__/
 pipeline_integration/__pycache__/
+.env
+**/.env

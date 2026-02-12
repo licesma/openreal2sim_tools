@@ -1,3 +1,4 @@
+# REPO_ROOT is read from .env in this directory. Edit .env for your machine (e.g. /data/openreal2sim or /data2/openreal2sim).
 services:
   from_others:
     build: .
@@ -5,15 +6,14 @@ services:
     stdin_open: true
     command: /bin/bash
     volumes:
-      - /data/openreal2sim/tools:/data/openreal2sim/tools
-      - /data/openreal2sim/divleen:/data/openreal2sim/divleen
-      - /data/openreal2sim/esteban:/data/openreal2sim/esteban
-      - /data/openreal2sim/junsoo:/data/openreal2sim/junsoo
-      - /data/openreal2sim/peiqi:/data/openreal2sim/peiqi
-      - /data/openreal2sim/scene_00020:/data/openreal2sim/scene_00020
-      - /data/openreal2sim/peiqi_scene:/data/openreal2sim/peiqi_scene
-      - /data/openreal2sim/scripts:/data/openreal2sim/scripts
-      - /data/openreal2sim/reconstructions:/data/openreal2sim/reconstructions
-    working_dir: /data/openreal2sim
+      - ${REPO_ROOT}/divleen:${REPO_ROOT}/divleen
+      - ${REPO_ROOT}/esteban:${REPO_ROOT}/esteban
+      - ${REPO_ROOT}/junsoo:${REPO_ROOT}/junsoo
+      - ${REPO_ROOT}/peiqi:${REPO_ROOT}/peiqi
+      - ${REPO_ROOT}/scene_00020:${REPO_ROOT}/scene_00020
+      - ${REPO_ROOT}/peiqi_scene:${REPO_ROOT}/peiqi_scene
+      - ${REPO_ROOT}/tools:${REPO_ROOT}/tools
+      - ${REPO_ROOT}/reconstructions:${REPO_ROOT}/reconstructions
+    working_dir: ${REPO_ROOT}
     environment:
-      - PYTHONPATH=/data/openreal2sim
+      - PYTHONPATH=${REPO_ROOT}
