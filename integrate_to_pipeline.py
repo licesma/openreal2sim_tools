@@ -108,7 +108,7 @@ def update_status(status: Dict[str, Dict[str, str]], keys: List[str],
             status[key][step] = "x"
 
 
-def integrate_to_pipeline(author: str, config: str, week: str, start_step: int = 1) -> None:
+def integrate_to_pipeline(author: str, config: str, week: str, start_step: int = 1, use_sam: bool = False, require_success: bool = False) -> None:
     """
     Run the full pipeline integration for an author.
 
@@ -117,6 +117,8 @@ def integrate_to_pipeline(author: str, config: str, week: str, start_step: int =
         config: Path to the YAML config file
         week: Week value to set in metadata (e.g., week_1)
         start_step: Step number to start from (1-5)
+        use_sam: If True, use SAM paths/documents instead of HUNYUAN for steps 4 and 5
+        require_success: If True, step 5 only moves keys whose metadata has reconstruction_status=success
     """
     # Convert config to absolute path
     config = str(Path(config).resolve())
@@ -144,6 +146,8 @@ def integrate_to_pipeline(author: str, config: str, week: str, start_step: int =
     print(f"Keys: {len(all_keys)}")
     if start_step > 1:
         print(f"Starting from step: {start_step}")
+    if require_success:
+        print(f"Step 5: require reconstruction_status=success")
     print(f"{'='*60}")
 
     # Show initial status
@@ -191,7 +195,7 @@ def integrate_to_pipeline(author: str, config: str, week: str, start_step: int =
     # Step 4: Push metadata to Firestore
     if start_step <= 4:
         step4_log = log_folder / "p4_push_metadatas.log"
-        step4_successful = push_metadatas(config, log_file=str(step4_log))
+        step4_successful = push_metadatas(config, log_file=str(step4_log), use_sam=use_sam)
 
         update_status(status, all_keys, "4_firestore", step4_successful)
         print_status_table(all_keys, status, reprint=True)
@@ -199,7 +203,7 @@ def integrate_to_pipeline(author: str, config: str, week: str, start_step: int =
     # Step 5: Move to reconstructions (organized by week/author)
     if start_step <= 5:
         step5_log = log_folder / "p5_move_to_reconstructions.log"
-        step5_successful = move_to_reconstructions(config, log_file=str(step5_log))
+        step5_successful = move_to_reconstructions(config, log_file=str(step5_log), use_sam=use_sam, require_success=require_success)
 
         update_status(status, all_keys, "5_recon", step5_successful)
         print_status_table(all_keys, status, reprint=True)
@@ -238,6 +242,18 @@ if __name__ == "__main__":
         choices=[1, 2, 3, 4, 5],
         help="Step to start from (1=move, 2=metadata, 3=storage, 4=firestore, 5=recon). Default: 1"
     )
+    parser.add_argument(
+        "--use-sam",
+        action="store_true",
+        default=False,
+        help="Use SAM paths/documents instead of HUNYUAN for steps 4 (firestore) and 5 (reconstructions)"
+    )
+    parser.add_argument(
+        "--require-success",
+        action="store_true",
+        default=False,
+        help="Step 5: only move keys whose metadata has reconstruction_status=success"
+    )
 
     args = parser.parse_args()
-    integrate_to_pipeline(args.author, args.config, args.week, args.step)
+    integrate_to_pipeline(args.author, args.config, args.week, args.step, args.use_sam, args.require_success)

@@ -9,7 +9,7 @@ import yaml
 from firebase_admin import credentials, firestore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from paths import ESTEBAN_OUTPUTS, FIREBASE_PATH
+from paths import ESTEBAN_OUTPUTS, FIREBASE_PATH, FIREBASE_COLLECTION, HUNYUAN_DOCUMENT, SAM_DOCUMENT
 
 OUTPUTS_BASE = ESTEBAN_OUTPUTS
 
@@ -74,7 +74,7 @@ def push_field_if_absent(
     return True
 
 
-def push_metadatas(config_path: str, log_file: str = None) -> List[str]:
+def push_metadatas(config_path: str, log_file: str = None, use_sam: bool = False) -> List[str]:
     """
     Push metadata.yaml contents to Firestore for all keys in config.
     After successful push, marks local metadata with synced: true.
@@ -82,11 +82,13 @@ def push_metadatas(config_path: str, log_file: str = None) -> List[str]:
     Args:
         config_path: Path to the YAML config file containing 'keys'
         log_file: If provided, write output to this file instead of stdout
+        use_sam: If True, use SAM_DOCUMENT instead of HUNYUAN_DOCUMENT
 
     Returns:
         List of keys that were successfully pushed or already synced
     """
     successful_keys: List[str] = []
+    document_name = SAM_DOCUMENT if use_sam else HUNYUAN_DOCUMENT
 
     def log(msg: str) -> None:
         if log_file:
@@ -104,7 +106,7 @@ def push_metadatas(config_path: str, log_file: str = None) -> List[str]:
             return successful_keys
 
         db = init_firebase(str(FIREBASE_PATH))
-        doc_ref = db.collection("reconstructions").document("metadata")
+        doc_ref = db.collection(FIREBASE_COLLECTION).document(document_name)
 
         pushed_count = 0
         already_synced_count = 0
@@ -114,7 +116,7 @@ def push_metadatas(config_path: str, log_file: str = None) -> List[str]:
 
         log(f"\nPushing metadatas to Firestore:")
         log(f"Base: {OUTPUTS_BASE}")
-        log(f"Document: reconstructions/metadata")
+        log(f"Document: {FIREBASE_COLLECTION}/{document_name}")
         log(f"Keys: {keys}\n")
 
         for key in keys:
@@ -134,12 +136,7 @@ def push_metadatas(config_path: str, log_file: str = None) -> List[str]:
             try:
                 metadata_obj = read_metadata_yaml(metadata_path)
 
-                # Check if already synced locally
-                if metadata_obj.get("synced") is True:
-                    log(f"⏭️  Already synced locally (skipping): {key}")
-                    already_synced_count += 1
-                    successful_keys.append(key)
-                    continue
+              
 
                 # Prepare metadata for Firestore (exclude 'synced' field)
                 metadata_to_push = {k: v for k, v in metadata_obj.items() if k != "synced"}
@@ -216,9 +213,15 @@ if __name__ == "__main__":
         default=None,
         help="Path to JSON file to write successful keys",
     )
+    parser.add_argument(
+        "--use-sam",
+        action="store_true",
+        default=False,
+        help="Use SAM document instead of HUNYUAN document",
+    )
 
     args = parser.parse_args()
-    successful = push_metadatas(args.config, args.log_file)
+    successful = push_metadatas(args.config, args.log_file, use_sam=args.use_sam)
 
     if args.output_json:
         with open(args.output_json, "w") as f:

@@ -19,4 +19,13 @@ ESTEBAN_OUTPUTS = ROOT / "esteban" / "outputs"
 
 TOOLS_PATH = ROOT / "tools"
 
+
+###################################################################
+#                 Firebase Constants
+###################################################################
+
 FIREBASE_PATH = TOOLS_PATH / "config" / "firebase.json"
+
+FIREBASE_COLLECTION = "reconstructions"
+HUNYUAN_DOCUMENT = "metadata"
+SAM_DOCUMENT = "sam"
