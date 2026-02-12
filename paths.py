@@ -6,7 +6,7 @@ These paths point to the shared data directories used throughout the pipeline.
 from pathlib import Path
 
 # Root path for the project
-ROOT = Path("/data/openreal2sim")
+ROOT = Path(__file__).resolve().parent.parent
 
 # Base path for reconstruction outputs organized by week/author
 # Structure: RECONSTRUCTIONS/<week>/<author>/<key>/
